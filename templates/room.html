@@ -1,0 +1,146 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+    <h1 id="titleHeader" class="code">Room Code: {{ code }}</h1>
+    <header id="header">
+        <button id="surrender" class="room-btn btn btn-primary">Surrender</button>
+        {% if user_player == "X" %}
+            <div class="player player-active" id="xPlayerDisplay">X</div>
+            <div class="player" id="oPlayerDisplay">O</div>
+        {% else %}
+            <div class="player" id="xPlayerDisplay">X</div>
+            <div class="player player-active" id="oPlayerDisplay">O</div>
+        {% endif %}
+        <form action="/exit_game" method="post">
+            <button id="exit" class="room-btn btn btn-primary" type="submit" disabled="True">Exit</button>
+        </form>
+    </header>
+
+    <div id="board">
+        {% for i in range(9) %}
+            <div class="cell b-cell" id="{{81 + i}}">
+                <div class="s-board">
+                    {% for j in range(9) %}
+                        <div class="cell s-cell" id="{{i * 9 + j}}"></div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div id="status">
+        {% if not winner %}
+            Game Underway
+        {% endif %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        const user_player = "{{ user_player }}";
+        var socketio = io();
+
+        socketio.on('message', (data) => {
+            updateBoard(data.board, data.last_move, data.current_player, data.winner, data.winning_combination);
+        });
+
+        const sendMessage = () => {
+            socketio.emit('message', {data: NaN});
+        }
+
+        const delete_room = () => {
+            socketio.emit('delete_room', {data: NaN});
+        }
+
+
+        $(document).ready(function() {
+            var winner = $('#status').text();
+            makeMove(NaN);
+            $('.cell').click(function() {
+                var position = parseInt($(this).attr('id'))
+                if (position < 81 && winner != "Tie" && winner != "X WON!" && winner != "O WON!") {
+                    makeMove(position);
+                    setTimeout(sendMessage, 500)
+                }
+            });
+            $('#surrender').click(function() {
+                if (winner != "Tie" && winner != "X WON!" && winner != "O WON!") {
+                    makeMove(-1);
+                    setTimeout(sendMessage, 500)
+                }
+            })
+        })
+
+        function makeMove(position, strict = false) {
+            $.ajax({
+                type: 'POST',
+                url: '/make_move',
+                contentType: 'application/json',
+                data: JSON.stringify({ 'position': position, 'user_player': user_player }),
+
+                success: function(data) {
+                    updateBoard(data.board, data.last_move, data.current_player, data.winner, data.winning_combination);
+                }
+            });
+        }
+
+        function updateBoard(board, last_move, current_player, winner = NaN, winning_combination) {
+            $('.s-cell').each(function(index) {
+                $(this).text(board[index]);
+            });
+            $('.b-cell').each(function(index) {
+                if ($(this).attr('id') === (81 + last_move).toString() || last_move === 10) {
+                    if (current_player === "X") {
+                        $(this).css('background-color', 'red');
+                    }
+                    else {
+                        $(this).css('background-color', 'blue');
+                    }
+                } else {
+                    $(this).css('background-color', 'wheat');
+                }
+                if ((winning_combination[0] === 9 && winning_combination[1] === 0 && winning_combination[2] === 0)) {
+                    $(this).css('background-color', '#F99C59');
+                } else if (!(winning_combination[0] === 1 && winning_combination[1] === 0 && winning_combination[2] === 0)) {
+                    if ($(this).attr('id') === (81 + winning_combination[0]).toString() ||
+                        $(this).attr('id') === (81 + winning_combination[1]).toString() ||
+                        $(this).attr('id') === (81 + winning_combination[2]).toString()) {
+                        $(this).css('background-color', '#F99C59');
+                    } else {
+                        $(this).css('background-color', 'wheat');
+                    }
+                }
+            });
+
+            
+            //for (var i = 0; i < 81; i += 9) {
+            //        var cells = $('.s-cell').slice(i, i + 9);
+            //        cells.not(cells.eq(4)).text('');
+            //    }
+            if (winner == "Tie" || winner == "X WON!" || winner == "O WON!") {
+                $("#surrender").prop('disabled', true);
+                $("#exit").prop('disabled', false);
+            } else {
+                $("#surrender").prop('disabled', false);
+                $("#exit").prop('disabled', true);
+            }
+
+            if (winner == "Tie"){
+                $('#status').text("It's a tie!");
+                setTimeout(delete_room, 800);
+            } else if (winner == "X WON!"){
+                $('#status').text("X wins!");
+                setTimeout(delete_room, 800);
+            } else if (winner == "O WON!"){
+                $('#status').text("O wins!");
+                setTimeout(delete_room, 800);
+            }
+            
+        }
+
+
+    </script>
+{% endblock %}
