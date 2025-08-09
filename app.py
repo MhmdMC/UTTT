@@ -48,6 +48,8 @@ def rooom():
         game = TicTacToe(list(board), current_player, last_move, winner=winner, winning_combination=winning_combination)
         room["game"] = game
 
+rooom()
+
 @app.route("/logout")
 def logout():
     """Log user out"""
@@ -154,7 +156,10 @@ def register():
 
 @app.route("/make_move", methods=["POST"])
 def make_move():
+    #rooom()
+    print("Make move called")
     if not session.get("code"): 
+        print("No code in session")
         return redirect("/play")
     for room in rooms:
         if room['code'] == session["code"]:
@@ -166,14 +171,19 @@ def make_move():
     data = request.get_json()
     position = data["position"]
     winning_combination = game.winning_combination
+    print(f"Position: {position}, User Player: {user_player}, Current Player: {game.current_player}")
     if game.current_player == user_player or position == -1:
+        print(f"{room["player_two_id"]} and {game.make_move(position)}")
         if (room["player_two_id"] and game.make_move(position)):
             turn = 1 if game.current_player == 'X' else 2
             winner = 1 if game.winner == 'X WON!' else 2 if game.winner == 'O WON!' else 3 if game.winner == 'Tie' else 0
+            print(f"Turn: {turn}, Winner: {winner}")
             if game.winning_combination:
+                print(f"Winning combination: {game.winning_combination}")
                 winning_combination = int(''.join(map(str, game.winning_combination)))
             else:
                 winning_combination = 100
+            print(f"Updating room with code {session['code']}")
             db.execute("UPDATE rooms SET board=?, turn=?, last_move=?, won=?, winning_combination=? WHERE code=?", ''.join(game.board), turn, game.last_move, winner, winning_combination, session["code"])
             return jsonify({'status': 'success', 'winner': game.winner, 'winning_combination': game.winning_combination, 'board': game.board_alt, 'last_move': game.last_move, 'current_player': game.current_player})
     
@@ -335,6 +345,7 @@ def games():
 if __name__ == "__main__":
     import eventlet
     import eventlet.wsgi
+    
     #socketio.run(app, port=5000, debug=True, allow_unsafe_werkzeug=True)
     socketio.run(app, host="0.0.0.0", port=5000, debug=True, allow_unsafe_werkzeug=True)
     #socketio.run(app, host='0.0.0.0', debug=True, allow_unsafe_werkzeug=True)
