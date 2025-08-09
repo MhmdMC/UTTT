@@ -333,4 +333,7 @@ def games():
     return render_template("games.html")
 
 if __name__ == "__main__":
-    socketio.run(app, host='0.0.0.0', debug=True, allow_unsafe_werkzeug=True)
+    import eventlet
+    import eventlet.wsgi
+    socketio.run(app, host="0.0.0.0", port=5000)
+    //socketio.run(app, host='0.0.0.0', debug=True, allow_unsafe_werkzeug=True)
