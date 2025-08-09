@@ -78,7 +78,6 @@ def index():
 
 
 @app.route("/rules", methods=["GET", "POST"])
-@login_required
 def rules():
     
 
@@ -121,22 +120,22 @@ def login():
 def register():
 
     if request.method == "GET":
-        return render_template("register.html")
+        return render_template("register.html", error=None)
     
     if not request.form.get("username"):
-        return redirect("/register")
+        return render_template("register.html", error="Please enter a username")
         return render_template("error.html", message="Please enter a username", code=400)
     
     if db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username")):
-        return redirect("/register")
+        return render_template("register.html", error="Username already taken")
         return render_template("error.html", message="Username already taken", code=400)
 
     if not request.form.get("password") or not request.form.get("password_2"):
-        return redirect("/register")
+        return render_template("register.html", error="Please enter a password")
         return render_template("error.html", message="Please enter a password", code=400)
     
     if request.form.get("password") != request.form.get("password_2"):
-        return redirect("/register")
+        return render_template("register.html", error="Passwords don't match")
         return render_template("error.html", message="Passwords don't match", code=400)
     
     username = request.form.get("username")
@@ -233,6 +232,7 @@ def play(status=""):
         return redirect("/room")
 
 @app.route("/room", methods=["GET", "POST"])
+@login_required
 def room():
     rooom()
     if request.method == "GET":
@@ -347,5 +347,5 @@ if __name__ == "__main__":
     import eventlet.wsgi
     
     #socketio.run(app, port=5000, debug=True, allow_unsafe_werkzeug=True)
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=False, allow_unsafe_werkzeug=True)
     #socketio.run(app, host='0.0.0.0', debug=True, allow_unsafe_werkzeug=True)

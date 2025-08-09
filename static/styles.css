@@ -22,6 +22,11 @@ main {
     font-weight: bold;
 }
 
+#code
+{
+    text-transform: uppercase;
+}
+
 #titleHeader
 {
     font-size: 4vh;

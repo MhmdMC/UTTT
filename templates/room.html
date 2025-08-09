@@ -51,6 +51,18 @@
         //    makemove(NaN);
         //});
 
+        function triggerMoveOnReturn() {
+            makeMove(NaN);
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) triggerMoveOnReturn();
+        });
+
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) triggerMoveOnReturn();
+        });
+
         const sendMessage = () => {
             socketio.emit('message', {data: NaN});
         }
