@@ -47,9 +47,9 @@
             updateBoard(data.board, data.last_move, data.current_player, data.winner, data.winning_combination);
         });
 
-        socket.on('connect', () => {
-            makemove(NaN);
-        });
+        //socket.on('connect', () => {
+        //    makemove(NaN);
+        //});
 
         const sendMessage = () => {
             socketio.emit('message', {data: NaN});
