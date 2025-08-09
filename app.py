@@ -22,7 +22,7 @@ app.config["DEBUG"] = True
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 Session(app)
 
-socketio = SocketIO(app, ping_interval=25, ping_timeout=60)
+socketio = SocketIO(app)
 
 # SQLite database
 db = SQL("sqlite:///project.db")
