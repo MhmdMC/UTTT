@@ -41,18 +41,14 @@
 
     <script>
         const user_player = "{{ user_player }}";
-        //var socketio = io();
-
-        var socketio = io({
-          reconnection: true,
-          reconnectionAttempts: Infinity,
-          reconnectionDelay: 500,  // Start delay in ms
-          reconnectionDelayMax: 2000, // Max delay between retries
-          timeout: 20000, // Connection timeout
-        });
+        var socketio = io();
 
         socketio.on('message', (data) => {
             updateBoard(data.board, data.last_move, data.current_player, data.winner, data.winning_combination);
+        });
+
+        socket.on('connect', () => {
+            makemove(NaN);
         });
 
         const sendMessage = () => {
