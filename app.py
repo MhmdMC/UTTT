@@ -138,6 +138,10 @@ def register():
         return render_template("register.html", error="Passwords don't match")
         return render_template("error.html", message="Passwords don't match", code=400)
     
+    if len(request.form.get("password")) < 8:
+        return render_template("register.html", error="Password must be at least 8 characters long")
+        return render_template("error.html", message="Password must be at least 8 characters long", code=400)
+    
     username = request.form.get("username")
     password = request.form.get("password")
     hash = generate_password_hash(password)
