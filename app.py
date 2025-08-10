@@ -232,6 +232,8 @@ def play(status=""):
 @login_required
 def room():
     rooom()
+    if not session.get("code"):
+        return redirect("/play")
     if request.method == "GET":
         for room in rooms:
             if room['code'] == session["code"]:
@@ -246,7 +248,7 @@ def room():
         game = TicTacToe(list(board), current_player, last_move, winner=winner, winning_combination=winning_combination)
         room["game"] = game
         user_player = 'X' if session["user_id"] == room['player_one_id'] else 'O'
-        return render_template("room.html", board=list(room['game'].board_alt), code=session["code"], user_player=user_player)
+        return render_template("room.html", board=list(room['game'].board_alt), code=session["code"], user_player=user_player, chat1test="test1", last_move=room['last_move'], current_player=room['game'].current_player, winner=room['game'].winner, winning_combination=room['game'].winning_combination)
     return redirect("/play")
 
 @app.route("/exit_game", methods=["GET", "POST"])
@@ -344,5 +346,5 @@ if __name__ == "__main__":
     import eventlet.wsgi
     
     #socketio.run(app, port=5000, debug=True, allow_unsafe_werkzeug=True)
-    socketio.run(app, host="0.0.0.0", port=5000, debug=False, allow_unsafe_werkzeug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True, allow_unsafe_werkzeug=True)
     #socketio.run(app, host='0.0.0.0', debug=True, allow_unsafe_werkzeug=True)

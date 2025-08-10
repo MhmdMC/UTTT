@@ -37,6 +37,10 @@
         {% endif %}
     </div>
 
+    <div id="chat1test">
+        {{ chat1test }}
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
@@ -46,10 +50,6 @@
         socketio.on('message', (data) => {
             updateBoard(data.board, data.last_move, data.current_player, data.winner, data.winning_combination);
         });
-
-        //socket.on('connect', () => {
-        //    makemove(NaN);
-        //});
 
         function triggerMoveOnReturn() {
             makeMove(NaN);
